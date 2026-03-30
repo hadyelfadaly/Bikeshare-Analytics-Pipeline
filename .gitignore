@@ -71,7 +71,7 @@ dbt/.user.yml
 # Airflow
 logs/
 airflow.db
-airflow/airflow.cfg
+airflow/config/airflow.cfg
 
 # Environment variables
 .env
