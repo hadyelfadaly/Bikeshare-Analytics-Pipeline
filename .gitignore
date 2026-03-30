@@ -1,4 +1,6 @@
 keys/
+.venv/
+.vscode/
 
 # Local .terraform directories
 .terraform/
@@ -69,12 +71,10 @@ dbt/.user.yml
 # Airflow
 logs/
 airflow.db
+airflow/airflow.cfg
 
 # Environment variables
 .env
 
 # OS
 .DS_Store
-
-.venv/
-.vscode/
