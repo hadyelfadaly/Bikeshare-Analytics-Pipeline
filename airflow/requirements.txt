@@ -1,0 +1,5 @@
+pandas
+pyarrow
+google-cloud-storage
+apache-airflow-providers-google
+dbt-bigquery
