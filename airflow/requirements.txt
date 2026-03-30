@@ -3,3 +3,5 @@ pyarrow
 google-cloud-storage
 apache-airflow-providers-google
 dbt-bigquery
+dbt-bigquery
+protobuf>=4.25,<5.0

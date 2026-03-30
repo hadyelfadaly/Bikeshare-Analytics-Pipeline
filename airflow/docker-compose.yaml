@@ -69,12 +69,14 @@ x-airflow-common:
     AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW__API_AUTH__JWT_SECRET:-airflow_jwt_secret}
     AIRFLOW__API_AUTH__JWT_ISSUER: ${AIRFLOW__API_AUTH__JWT_ISSUER:-airflow}
     GOOGLE_APPLICATION_CREDENTIALS: /opt/airflow/keys/credentials/my-creds.json
-    AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT: 'google-cloud-platform://?extra__google_cloud_platform__key_path: {}/opt/airflow/keys/credentials/my-creds.json'
+    AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT: 'google-cloud-platform://?extra__google_cloud_platform__key_path=/opt/airflow/keys/credentials/my-creds.json'
     # The following variables are used in the DAG to connect to GCP and should be set in the .env file or as environment variables
-    GCP_PROJECT_ID: ${GCP_PROJECT_ID}
-    GCP_GCS_BUCKET: ${GCP_GCS_BUCKET}
-    BIGQUERY_DATASET: ${BIGQUERY_DATASET}
-    DBT_PROFILES_DIR: /opt/airflow/dbt
+    GCP_PROJECT_ID: '${GCP_PROJECT_ID}'
+    GCP_GCS_BUCKET: '${GCP_GCS_BUCKET}'
+    BIGQUERY_DATASET: '${BIGQUERY_DATASET}'
+    DBT_KEYFILE: /opt/airflow/keys/credentials/my-creds.json
+    DBT_PROJECT_DIR: /opt/airflow/dbt/bikeshare_pipeline
+    DBT_PROFILES_DIR: /opt/airflow/.dbt
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
@@ -90,8 +92,9 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
-    - ${AIRFLOW_PROJ_DIR:-.}/dbt:/opt/airflow/dbt  
+    - ../dbt:/opt/airflow/dbt
     - ../keys:/opt/airflow/keys/credentials:ro
+    - ~/.dbt:/opt/airflow/.dbt:ro
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on

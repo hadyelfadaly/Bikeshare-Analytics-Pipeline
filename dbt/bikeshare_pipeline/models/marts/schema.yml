@@ -1,0 +1,91 @@
+version: 2
+
+models:
+  - name: dim_stations
+    description: "This model contains information about each bike station"
+    columns:
+      - name: station_id
+        description: "Unique identifier for each station."
+        tests:
+          - not_null
+          - unique
+      - name: station_name
+        description: "Name of the station."
+  - name: dim_location
+    description: "This model contains information about the locations of the stations."
+    columns:
+      - name: location_id
+        description: "Unique identifier for each location."
+        tests:
+          - not_null
+          - unique
+      - name: latitude
+        description: "Latitude of the location."
+        tests:
+          - not_null
+      - name: longitude
+        description: "Longitude of the location."
+        tests:
+          - not_null
+  - name: fct_trips
+    description: "This model contains the fact table for trips, with foreign keys to the dimension tables."
+    columns:
+      - name: trip_id
+        description: "Surrogate key for each cleaned trip record."
+        tests:
+          - not_null
+          - unique
+      - name: ride_id
+        description: "Unique identifier for each trip."
+        tests:
+          - not_null
+      - name: start_location_id
+        description: "Foreign key to dim_location for the trip start coordinate."
+        tests:
+          - relationships:
+              to: ref('dim_location')
+              field: location_id
+      - name: end_location_id
+        description: "Foreign key to dim_location for the trip end coordinate."
+        tests:
+          - relationships:
+              to: ref('dim_location')
+              field: location_id
+      - name: started_at
+        description: "Timestamp when the trip started."
+        tests:
+          - not_null
+      - name: ended_at
+        description: "Timestamp when the trip ended."
+        tests:
+          - not_null
+      - name: rideable_type
+        description: "Type of bike used for the trip."
+      - name: start_station_id
+        description: "Foreign key to dim_stations for the station where the trip started."
+        tests:
+          - relationships:
+              to: ref('dim_stations')
+              field: station_id
+      - name: end_station_id
+        description: "Foreign key to dim_stations for the station where the trip ended."
+        tests:
+          - relationships:
+              to: ref('dim_stations')
+              field: station_id
+      - name: trip_duration_minutes
+        description: "Trip duration in minutes based on started_at and ended_at."
+      - name: trip_distance_meters
+        description: "Great-circle distance between start and end coordinates in meters."
+      - name: pickup_type
+        description: "Derived pickup behavior category (station, dockless, or unknown)."
+        tests:
+          - accepted_values:
+              values: ['dockless_pickup', 'missing_station_unknown', 'station_pickup']
+      - name: dropoff_type
+        description: "Derived dropoff behavior category (station, dockless, or unknown)."
+        tests:
+          - accepted_values:
+              values: ['dockless_dropoff', 'missing_station_unknown', 'station_dropoff']
+      - name: member_casual
+        description: "Rider category indicating whether the user is a member or casual rider."

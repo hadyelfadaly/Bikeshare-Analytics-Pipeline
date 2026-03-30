@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stg_bikeshare_trips
+    description: "Staging model for bikeshare trips data, transforming raw data into a more analysis-friendly format."
+    columns:
+      - name: ride_id
+        description: "Unique identifier for each trip."
+        tests:
+          - not_null
+      - name: rideable_type
+        description: "Type of bike used for the trip (e.g., classic, electric, docked)."
+      - name: started_at
+        description: "Timestamp when the trip started."
+      - name: ended_at
+        description: "Timestamp when the trip ended."
+      - name: start_station_id
+        description: "Identifier for the station where the trip started."
+      - name: start_station_name
+        description: "Name of the station where the trip started."
+      - name: end_station_id
+        description: "Identifier for the station where the trip ended."
+      - name: end_station_name
+        description: "Name of the station where the trip ended."
+      - name: start_lat
+        description: "Latitude of the station where the trip started."
+      - name: start_lng
+        description: "Longitude of the station where the trip started."
+      - name: end_lat
+        description: "Latitude of the station where the trip ended."
+      - name: end_lng
+        description: "Longitude of the station where the trip ended."
+      - name: member_casual
+        description: "Rider category indicating whether the user is a member or casual rider."

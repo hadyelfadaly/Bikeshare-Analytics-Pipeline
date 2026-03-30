@@ -1,9 +1,9 @@
 import os
 import logging
 from airflow import DAG
-from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
-from airflow.providers.google.cloud.transfers.operators.gcs_to_bigquery import GCSToBigQueryOperator
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.providers.standard.operators.python import PythonOperator
+from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 from google.cloud import storage
 import pyarrow.csv as pv
 import pyarrow.parquet as pq
@@ -16,8 +16,8 @@ BUCKET_NAME = os.getenv("GCP_GCS_BUCKET")
 DATASET_NAME = os.getenv("BIGQUERY_DATASET")
 AIRFLOW_HOME = os.environ.get("AIRFLOW_HOME", "/opt/airflow/")
 URL_PREFIX = "https://divvy-tripdata.s3.amazonaws.com"
-URL_TEMPLATE = URL_PREFIX + "{{execution_date.strftime('%Y%m')}}-divvy-tripdata.zip"
-file_name = "{{execution_date.strftime('%Y%m')}}-divvy-tripdata.zip"
+URL_TEMPLATE = URL_PREFIX + "/{{logical_date.strftime('%Y%m')}}-divvy-tripdata.zip"
+file_name = "{{logical_date.strftime('%Y%m')}}-divvy-tripdata.zip"
 OUTPUT_FILE_TEMPLATE = f"{AIRFLOW_HOME}/{file_name}"
 parquet_file = file_name.replace('.zip', '.parquet')
 default_args = {
@@ -67,7 +67,7 @@ def upload_to_gcs(bucket_name, object_name, local_file):
 
 with DAG(
     dag_id="GCPIngestionDag",
-    schedule_interval="@Monthly",
+    schedule="@monthly",
     default_args=default_args,
     catchup=True,
     max_active_runs=1
@@ -97,11 +97,21 @@ with DAG(
         source_objects=[f"raw/{parquet_file}"],
         destination_project_dataset_table=f"{PROJECT_ID}.{DATASET_NAME}.trips",
         source_format='PARQUET',
-        write_disposition='WRITE_APPEND'
+        write_disposition='WRITE_TRUNCATE'
     )
     cleanup_task = BashOperator(
         task_id="cleanup",
         bash_command=f"echo 'Cleaning up {file_name}...' && rm -f {OUTPUT_FILE_TEMPLATE} {OUTPUT_FILE_TEMPLATE.replace('.zip', '.parquet')}"
     )
+    dbt_transformation = BashOperator(
+    task_id="dbt_transformation",
+    bash_command=(
+        "cd /opt/airflow/dbt/bikeshare_pipeline && "
+        "dbt deps --profiles-dir /opt/airflow/.dbt && "
+        "dbt run --profiles-dir /opt/airflow/.dbt --target prod && "
+        "dbt test --profiles-dir /opt/airflow/.dbt --target prod || true && "
+        "dbt docs generate --profiles-dir /opt/airflow/.dbt --target prod"
+    )
+)
 
-    download_data >> format_to_parquet_task >> upload_bucket >> load_data >> cleanup_task
+    download_data >> format_to_parquet_task >> upload_bucket >> load_data >> cleanup_task >> dbt_transformation

@@ -67,6 +67,10 @@ dbt/target/
 dbt/dbt_packages/
 dbt/logs/
 dbt/.user.yml
+dbt/bikeshare_pipeline/target/
+dbt/bikeshare_pipeline/dbt_packages/
+dbt/bikeshare_pipeline/logs/
+dbt/bikeshare_pipeline/.user.yml
 
 # Airflow
 logs/

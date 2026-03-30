@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: int_bikeshare_trips
+    description: "Intermediate model for bikeshare trips data, further transforming staging data for analysis and reporting."
+    columns:
+      - name: trip_id
+        description: "Surrogate key for each trip, generated in the intermediate model."
+        tests:
+          - not_null
+          - unique
+      - name: ride_id
+        description: "Unique identifier for each trip."
+        tests:
+          - not_null
+      - name: rideable_type
+        description: "Type of bike used for the trip (e.g., classic, electric, docked)."
+        tests:
+          - accepted_values:
+              values: ['classic_bike', 'electric_bike', 'docked_bike']
+      - name: started_at
+        description: "Timestamp when the trip started."
+      - name: ended_at
+        description: "Timestamp when the trip ended."
+      - name: start_station_id
+        description: "Identifier for the station where the trip started."
+      - name: start_station_name
+        description: "Name of the station where the trip started."
+      - name: start_station_latitude
+        description: "Latitude of the station where the trip started."
+      - name: start_station_longitude
+        description: "Longitude of the station where the trip started."
+      - name: end_station_id
+        description: "Identifier for the station where the trip ended."
+      - name: end_station_name
+        description: "Name of the station where the trip ended."
+      - name: end_station_latitude
+        description: "Latitude of the station where the trip ended."
+      - name: end_station_longitude
+        description: "Longitude of the station where the trip ended."
+      - name: pickup_type
+        description: "Classify based on NA values in start_station_id, indicating whether the trip started at a station or not."
+        tests:
+          - accepted_values:
+              values: ['dockless_pickup', 'missing_station_unknown', 'station_pickup']
+      - name: dropoff_type
+        description: "Classify based on NA values in end_station_id and end_station_name, indicating whether the trip ended at a station or not."
+        tests:
+          - accepted_values:
+              values: ['dockless_dropoff', 'missing_station_unknown', 'station_dropoff']
+      - name: member_casual
+        description: "Rider category indicating whether the user is a member or casual rider."
+        tests:
+          - accepted_values:
+              values: ['member', 'casual']

@@ -1,0 +1,41 @@
+version: 2
+
+sources:
+  - name: raw_data
+    description: "Raw data from the bikeshare system, directly from BigQuery."
+    database: bikeshare-analytics-pipeline #project id
+    schema: raw_bikeshare_data #dataset name
+    tables:
+      - name: trips
+        description: "Raw trip data for the bikeshare system, including all columns as ingested from the source."
+        loaded_at_field: "TIMESTAMP_MICROS(CAST(started_at/1000 AS INT64))"
+        freshness:
+          warn_after: {count: 60, period: day}
+          error_after: {count: 90, period: day}
+        columns:
+          - name: ride_id
+            description: "Unique identifier for each trip."
+          - name: rideable_type
+            description: "Type of bike used for the trip (e.g., classic, electric, docked)."
+          - name: started_at
+            description: "Timestamp when the trip started in nano seconds."
+          - name: ended_at
+            description: "Timestamp when the trip ended in nano seconds."
+          - name: start_station_id
+            description: "Identifier for the station where the trip started."
+          - name: start_station_name
+            description: "Name of the station where the trip started."
+          - name: end_station_id
+            description: "Identifier for the station where the trip ended."
+          - name: end_station_name
+            description: "Name of the station where the trip ended."
+          - name: start_lat
+            description: "Latitude of the station where the trip started."
+          - name: start_lng
+            description: "Longitude of the station where the trip started."
+          - name: end_lat
+            description: "Latitude of the station where the trip ended."
+          - name: end_lng
+            description: "Longitude of the station where the trip ended."
+          - name: member_casual
+            description: "Rider category indicating whether the user is a member or casual rider."
