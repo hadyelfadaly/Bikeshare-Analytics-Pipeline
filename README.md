@@ -3,6 +3,11 @@
 ![GCP](https://img.shields.io/badge/-GCP-4285F4?style=flat-square&logo=googlecloud&logoColor=white)
 ![Airflow](https://img.shields.io/badge/-Airflow-017CEE?style=flat-square&logo=apacheairflow&logoColor=white)
 ![dbt](https://img.shields.io/badge/-dbt-FF694B?style=flat-square&logo=dbt&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![BigQuery](https://img.shields.io/badge/BigQuery-4285F4?style=flat-square&logo=googlebigquery&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=flat-square&logo=terraform&logoColor=white)
+![Power BI](https://img.shields.io/badge/PowerBI-F2C811?style=flat-square&logo=powerbi&logoColor=black)
 
 ## Motivation & Project Overview
 
@@ -118,16 +123,18 @@ Test categories used:
 - `relationships`
 - `accepted_values`
 
-## Dashboard Status
+## Dashboard
 
 Dashboard integration is implemented as the serving layer for business reporting.
 
 Current project state:
 
 - Warehouse models and quality tests are in place.
+- Two report tiles are live and connected to warehouse outputs:
+   `operational_map_tile` and `membership_behaviour_tile`.
 - Dashboard file is included under `Dashboard/`.
 
-The marts layer is ready to be connected to a BI tool (for example Looker Studio or Power BI).
+The marts layer is already connected to BI reporting through the live Power BI dashboard.
 
 Live Dashboard Link:
 
@@ -162,8 +169,9 @@ Bikeshare Analytics Pipeline/
 ├── terraform/
 │   ├── main.tf
 │   └── variables.tf
-└── keys/
 ```
+
+Note: `keys/` is a local credentials directory and is gitignored (not committed).
 
 ## Setup & Reproducibility
 
@@ -310,9 +318,7 @@ This project is designed as a production-style data engineering workflow, not ju
 - Cloud infrastructure provisioning,
 - Orchestrated batch ingestion,
 - Tested dbt transformations,
-- And a marts layer ready for BI consumption.
-
-The next milestone is expanding dashboard coverage with additional operational and trend-focused visuals.
+- And a marts layer powering live BI consumption.
 
 ## Future Enhancements
 
