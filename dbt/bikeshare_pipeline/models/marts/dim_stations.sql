@@ -1,4 +1,9 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='incremental',
+    unique_key='station_id',
+    incremental_strategy='merge'
+) 
+}}
 
 WITH unionedStations AS (
     SELECT
@@ -23,4 +28,4 @@ stations AS (
     QUALIFY ROW_NUMBER() OVER (PARTITION BY start_station_id ORDER BY start_station_name) = 1
 )
 
-SELECT * FROM stations
+SELECT * FROM stationss

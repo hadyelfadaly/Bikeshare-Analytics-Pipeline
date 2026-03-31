@@ -1,4 +1,8 @@
-# Bikeshare Analytics Pipeline (GCP + Airflow + dbt)
+# Bikeshare Analytics Pipeline
+
+![GCP](https://img.shields.io/badge/-GCP-4285F4?style=flat-square&logo=googlecloud&logoColor=white)
+![Airflow](https://img.shields.io/badge/-Airflow-017CEE?style=flat-square&logo=apacheairflow&logoColor=white)
+![dbt](https://img.shields.io/badge/-dbt-FF694B?style=flat-square&logo=dbt&logoColor=white)
 
 ## Motivation & Project Overview
 
@@ -41,6 +45,8 @@ The project follows a batch ELT architecture:
 5. Transformations: dbt models (staging -> intermediate -> marts).
 6. Analytics Layer: Star-like marts with dimensions and a trips fact table.
 
+![Pipeline Architecture](Imgs/Pipeline%20Architecture.drawio.png)
+
 ## Cloud & IaC
 
 Cloud platform and resources are managed on GCP.
@@ -80,6 +86,11 @@ Current marts:
 - `dim_location`
 - `fct_trips`
 
+Current report-serving models:
+
+- `Report/operational_map_tile`
+- `Report/membership_behaviour_tile`
+
 `fct_trips` includes:
 
 - Ride identifiers and station/location foreign keys
@@ -87,6 +98,7 @@ Current marts:
 - Geodesic distance (`trip_distance_meters`)
 - Dockless/station behavior classification
 - Incremental materialization with `merge` strategy on `trip_id`
+- Partitioning by `started_at` (monthly) and clustering by `member_casual`, `rideable_type`
 
 ## Transformations (dbt)
 
@@ -97,6 +109,7 @@ Transformations are fully defined in dbt and include:
 - Intermediate logic for `pickup_type` / `dropoff_type`.
 - Fact/dimension joins in marts.
 - Incremental fact loading in marts (`fct_trips`) to avoid full rebuilds every run.
+- BigQuery performance optimization using partitioning and clustering in `fct_trips`.
 - Data quality tests across intermediate and marts layers.
 
 Test categories used:
@@ -104,18 +117,23 @@ Test categories used:
 - `not_null`, `unique`
 - `relationships`
 - `accepted_values`
-- `dbt_utils.expression_is_true` for metric sanity checks
 
 ## Dashboard Status
 
-Dashboard integration is planned as the final serving layer.
+Dashboard integration is implemented as the serving layer for business reporting.
 
 Current project state:
 
 - Warehouse models and quality tests are in place.
-- Dashboard artifacts are not yet committed in this repository.
+- Dashboard file is included under `Dashboard/`.
 
 The marts layer is ready to be connected to a BI tool (for example Looker Studio or Power BI).
+
+Live Dashboard Link:
+
+- [View Live Power BI Dashboard](https://app.powerbi.com/groups/f22fa21b-9835-4618-a31e-d9148b7589d4/reports/a41cf92c-4bce-4475-85e0-3840c88f3edc?ctid=77255288-5298-4ea5-81aa-a13e604c30ac&pbi_source=linkShare)
+
+![Dashboard Preview](Imgs/Dashboard.png)
 
 ## Repository Structure
 
@@ -127,6 +145,8 @@ Bikeshare Analytics Pipeline/
 │   ├── docker-compose.yaml
 │   ├── Dockerfile
 │   └── requirements.txt
+├── Dashboard/
+│   └── Bikeshare Dashboard.pbix
 ├── dbt/
 │   └── bikeshare_pipeline/
 │       ├── dbt_project.yml
@@ -134,6 +154,9 @@ Bikeshare Analytics Pipeline/
 │       │   ├── staging/
 │       │   ├── intermediate/
 │       │   └── marts/
+│       │       └── Report/
+│       │           ├── operational_map_tile.sql
+│       │           └── membership_behaviour_tile.sql
 │       ├── macros/
 │       └── packages.yml
 ├── terraform/
@@ -253,7 +276,7 @@ In Airflow UI:
 
 1. Trigger `GCPIngestionDag`.
 2. Verify task order succeeds:
-	`download_data -> format_to_parquet -> upload_to_gcs -> gcs_to_bigquery -> cleanup -> dbt_transformation`
+   `download_data -> format_to_parquet -> upload_to_gcs -> gcs_to_bigquery -> cleanup -> dbt_transformation`
 3. Confirm output in BigQuery marts tables.
 
 ### 9. Re-run behavior (idempotency checks)
@@ -264,6 +287,22 @@ To verify reproducibility, run the DAG again for another logical date and confir
 - dbt models rebuild successfully.
 - Tests pass consistently (`dbt test`).
 
+### 10. Airflow and Power BI notes
+
+Airflow:
+
+- The DAG is included to show orchestration flow and reproducible task order.
+- If you are only validating transformation logic, local `dbt run` and `dbt test` are enough.
+- If you run Airflow, use the same env/profile mounts documented above so behavior matches local dbt.
+- The final orchestration task runs dbt and builds marts/report models used by the dashboard tiles.
+
+Power BI:
+
+- The dashboard file is provided in `Dashboard/Bikeshare Dashboard.pbix`.
+- Open it in Power BI Desktop and point data source credentials to your BigQuery project.
+- Dashboard visuals are fed by marts + report models, especially `operational_map_tile` and `membership_behaviour_tile`.
+- If BigQuery table names match this repo's dbt models, visuals should refresh with minimal changes.
+
 ## Final Notes
 
 This project is designed as a production-style data engineering workflow, not just isolated SQL scripts. It combines:
@@ -273,11 +312,9 @@ This project is designed as a production-style data engineering workflow, not ju
 - Tested dbt transformations,
 - And a marts layer ready for BI consumption.
 
-The next milestone is publishing BI artifacts and attaching execution screenshots for pipeline documentation.
+The next milestone is expanding dashboard coverage with additional operational and trend-focused visuals.
 
 ## Future Enhancements
 
 - Add a late-arriving data lookback window for incremental `fct_trips` loads (for example reprocessing the last N days).
-- Add partitioning and clustering configs on `fct_trips` based on final BI query patterns.
-- Add dashboard artifacts and screenshots directly in the repository.
 - Add CI checks to run `dbt build` on pull requests.

@@ -4,6 +4,12 @@
         unique_key="trip_id",
         incremental_strategy="merge",
         on_schema_change="append_new_columns",
+        partition_by={
+            "field": "started_at",
+            "data_type": "timestamp",
+            "granularity": "month",
+        },
+        cluster_by=["member_casual", "rideable_type"],
     )
 }}
 
@@ -46,7 +52,8 @@ select *
 from trips
 
 {% if is_incremental() %}
-    -- Only process new trips based on started_at timestamp, assuming that new trips will have a later started_at than existing ones
+    -- Only process new trips based on started_at timestamp, assuming that new trips
+    -- will have a later started_at than existing ones
     where
         started_at
         >= (select coalesce(max(started_at), timestamp('1900-01-01')) from {{ this }})

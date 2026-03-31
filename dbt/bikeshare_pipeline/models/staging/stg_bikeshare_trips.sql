@@ -27,3 +27,4 @@ WHERE ride_id IS NOT NULL
     AND started_at IS NOT NULL
     AND ended_at IS NOT NULL
     AND ended_at > started_at
+QUALIFY ROW_NUMBER() OVER (PARTITION BY ride_id ORDER BY started_at) = 1

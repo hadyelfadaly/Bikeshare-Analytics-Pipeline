@@ -97,7 +97,7 @@ with DAG(
         source_objects=[f"raw/{parquet_file}"],
         destination_project_dataset_table=f"{PROJECT_ID}.{DATASET_NAME}.trips",
         source_format='PARQUET',
-        write_disposition='WRITE_TRUNCATE'
+        write_disposition='WRITE_APPEND'
     )
     cleanup_task = BashOperator(
         task_id="cleanup",
