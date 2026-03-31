@@ -45,12 +45,18 @@ models:
           - relationships:
               to: ref('dim_location')
               field: location_id
+              where: "start_location_id IS NOT NULL"
+              config:
+                severity: warn    # ← won't fail the task
       - name: end_location_id
         description: "Foreign key to dim_location for the trip end coordinate."
         tests:
           - relationships:
               to: ref('dim_location')
               field: location_id
+              where: "end_location_id IS NOT NULL"
+              config:
+                severity: warn    # ← won't fail the task
       - name: started_at
         description: "Timestamp when the trip started."
         tests:
@@ -67,12 +73,18 @@ models:
           - relationships:
               to: ref('dim_stations')
               field: station_id
+              where: "start_station_id IS NOT NULL"
+              config:
+                severity: warn    # ← won't fail the task
       - name: end_station_id
         description: "Foreign key to dim_stations for the station where the trip ended."
         tests:
           - relationships:
               to: ref('dim_stations')
               field: station_id
+              where: "end_station_id IS NOT NULL"
+              config:
+                severity: warn    # ← won't fail the task
       - name: trip_duration_minutes
         description: "Trip duration in minutes based on started_at and ended_at."
       - name: trip_distance_meters

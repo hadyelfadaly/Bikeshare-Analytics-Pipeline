@@ -109,7 +109,7 @@ with DAG(
         "cd /opt/airflow/dbt/bikeshare_pipeline && "
         "dbt deps --profiles-dir /opt/airflow/.dbt && "
         "dbt run --profiles-dir /opt/airflow/.dbt --target prod && "
-        "dbt test --profiles-dir /opt/airflow/.dbt --target prod || true && "
+        "dbt test --profiles-dir /opt/airflow/.dbt --target prod && "
         "dbt docs generate --profiles-dir /opt/airflow/.dbt --target prod"
     )
 )

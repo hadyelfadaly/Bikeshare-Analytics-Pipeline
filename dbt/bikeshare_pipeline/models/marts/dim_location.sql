@@ -1,4 +1,8 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='incremental',
+    unique_key='location_id',
+    incremental_strategy='merge'
+) }}
 
 with coordinates AS (
     SELECT
