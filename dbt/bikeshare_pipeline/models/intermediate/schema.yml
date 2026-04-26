@@ -17,7 +17,7 @@ models:
         description: "Type of bike used for the trip (e.g., classic, electric, docked)."
         tests:
           - accepted_values:
-              values: ['classic_bike', 'electric_bike', 'docked_bike']
+              values: ['classic_bike', 'electric_bike']
       - name: started_at
         description: "Timestamp when the trip started."
       - name: ended_at

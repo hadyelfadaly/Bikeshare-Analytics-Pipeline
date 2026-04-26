@@ -8,12 +8,20 @@ models:
         description: "Unique identifier for each trip."
         tests:
           - not_null
+          - unique
       - name: rideable_type
-        description: "Type of bike used for the trip (e.g., classic, electric, docked)."
+        description: "Type of bike used for the trip (e.g., classic, electric)."
+        tests:
+          - accepted_values:
+              values: ['classic_bike', 'electric_bike']
       - name: started_at
         description: "Timestamp when the trip started."
+        tests:
+          - not_null
       - name: ended_at
         description: "Timestamp when the trip ended."
+        tests:
+          - not_null
       - name: start_station_id
         description: "Identifier for the station where the trip started."
       - name: start_station_name
@@ -32,3 +40,6 @@ models:
         description: "Longitude of the station where the trip ended."
       - name: member_casual
         description: "Rider category indicating whether the user is a member or casual rider."
+        tests:
+          - accepted_values:
+              values: ['member', 'casual']

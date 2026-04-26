@@ -8,19 +8,27 @@ sources:
     tables:
       - name: trips
         description: "Raw trip data for the bikeshare system, including all columns as ingested from the source."
-        loaded_at_field: "TIMESTAMP_MICROS(CAST(started_at/1000 AS INT64))"
-        freshness:
-          warn_after: {count: 60, period: day}
-          error_after: {count: 90, period: day}
+        config:
+          loaded_at_field: "TIMESTAMP_MICROS(CAST(started_at/1000 AS INT64))"
+          freshness:
+            warn_after: {count: 60, period: day}
+            error_after: {count: 90, period: day}
         columns:
           - name: ride_id
             description: "Unique identifier for each trip."
+            tests:
+              - not_null
+              - unique
           - name: rideable_type
             description: "Type of bike used for the trip (e.g., classic, electric, docked)."
           - name: started_at
             description: "Timestamp when the trip started in nano seconds."
+            tests:
+              - not_null
           - name: ended_at
             description: "Timestamp when the trip ended in nano seconds."
+            tests:
+              - not_null
           - name: start_station_id
             description: "Identifier for the station where the trip started."
           - name: start_station_name

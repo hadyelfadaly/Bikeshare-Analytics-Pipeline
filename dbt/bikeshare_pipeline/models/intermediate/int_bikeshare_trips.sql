@@ -20,9 +20,8 @@ WITH cleaned_trips AS (
         end_station_name,
         end_station_latitude,
         end_station_longitude,
-        {{ pickup_type('rideable_type', 'start_station_id') }},
-        {{ dropoff_type('rideable_type', 'end_station_id') }},
-
+        {{ dropoffpickup_type('rideable_type', 'start_station_id', 'pickup') }},
+        {{ dropoffpickup_type('rideable_type', 'end_station_id', 'dropoff') }},
         member_casual
     FROM
         {{ ref('stg_bikeshare_trips') }}

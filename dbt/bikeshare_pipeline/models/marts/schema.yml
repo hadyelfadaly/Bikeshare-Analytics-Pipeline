@@ -46,8 +46,6 @@ models:
               to: ref('dim_location')
               field: location_id
               where: "start_location_id IS NOT NULL"
-              config:
-                severity: warn    # ← won't fail the task
       - name: end_location_id
         description: "Foreign key to dim_location for the trip end coordinate."
         tests:
@@ -55,8 +53,6 @@ models:
               to: ref('dim_location')
               field: location_id
               where: "end_location_id IS NOT NULL"
-              config:
-                severity: warn    # ← won't fail the task
       - name: started_at
         description: "Timestamp when the trip started."
         tests:
@@ -67,6 +63,9 @@ models:
           - not_null
       - name: rideable_type
         description: "Type of bike used for the trip."
+        tests:
+          - accepted_values:
+              values: ['classic_bike', 'electric_bike']
       - name: start_station_id
         description: "Foreign key to dim_stations for the station where the trip started."
         tests:
@@ -74,8 +73,6 @@ models:
               to: ref('dim_stations')
               field: station_id
               where: "start_station_id IS NOT NULL"
-              config:
-                severity: warn    # ← won't fail the task
       - name: end_station_id
         description: "Foreign key to dim_stations for the station where the trip ended."
         tests:
@@ -83,8 +80,6 @@ models:
               to: ref('dim_stations')
               field: station_id
               where: "end_station_id IS NOT NULL"
-              config:
-                severity: warn    # ← won't fail the task
       - name: trip_duration_minutes
         description: "Trip duration in minutes based on started_at and ended_at."
       - name: trip_distance_meters
@@ -101,3 +96,27 @@ models:
               values: ['dockless_dropoff', 'missing_station_unknown', 'station_dropoff']
       - name: member_casual
         description: "Rider category indicating whether the user is a member or casual rider."
+        tests:
+          - accepted_values:
+              values: ['member', 'casual']
+  - name: membership_behaviour_tile
+    description: "Report model answering: How does riding behavior differ between members and casual riders? Aggregates trip metrics by membership type for dashboard consumption."
+    columns:
+      - name: member_casual
+        description: "Rider category indicating whether the user is a member or casual rider."
+      - name: average_trip_duration_minutes
+        description: "Average trip duration in minutes for this membership category."
+      - name: average_trip_distance_meters
+        description: "Average trip distance in meters for this membership category."
+
+  - name: operational_map_tile
+    description: "Report model answering: Where are bikes being picked up and dropped off? Provides coordinates for map visualizations."
+    columns:
+      - name: latitude
+        description: "Latitude of the station location."
+      - name: longitude
+        description: "Longitude of the station location."
+      - name: pickup_type
+        description: "Derived pickup behavior category (station, dockless, or unknown)."
+      - name: trip_count
+        description: "Count of trips for this pickup type per location."

@@ -81,9 +81,9 @@ This is an end-to-end orchestrated batch pipeline (not partially manual).
 
 Warehouse layers are implemented in dbt:
 
-- `staging`: Type casting, null standardization, and base cleaning.
-- `intermediate`: Surrogate trip ID, deduplication policy, and business behavior flags.
-- `marts`: Analytical dimensions/fact models.
+- `staging`: Type casting, null standardization, and base cleaning. First line of defense against bad data with tests covering nullability, uniqueness, and accepted values on all critical columns.
+- `intermediate`: Surrogate trip ID generation, deduplication policy (single source of truth), and business behavior flag assignment.
+- `marts`: Analytical dimensions and fact models.
 
 Current marts:
 
@@ -103,19 +103,33 @@ Current report-serving models:
 - Geodesic distance (`trip_distance_meters`)
 - Dockless/station behavior classification
 - Incremental materialization with `merge` strategy on `trip_id`
-- Partitioning by `started_at` (monthly) and clustering by `member_casual`, `rideable_type`
+- Partitioning by `started_at` (monthly granularity) and clustering by `member_casual`, `rideable_type`
+
+**Partitioning & Clustering Performance:**
+Validated with before/after BigQuery queries filtering on `started_at`. Bytes processed dropped from **80.91 MB → 5.17 MB** (~94% reduction), confirming partition pruning is working correctly.
+
+| | Before | After |
+|---|---|---|
+| Bytes processed | 80.91 MB | 5.17 MB |
+| Bytes billed | 81 MB | 10 MB |
+| Slot milliseconds | 685 | 250 |
+
+![Before Partitioning](Imgs/Before%20Partitioning.png)
+![After Partitioning](Imgs/After%20Partitioning.png)
 
 ## Transformations (dbt)
 
 Transformations are fully defined in dbt and include:
 
-- Source definitions and documentation.
-- Staging standardization (`NULLIF`, casts, timestamp normalization).
-- Intermediate logic for `pickup_type` / `dropoff_type`.
+- Source definitions and column-level documentation.
+- Staging standardization (`NULLIF`, casts, timestamp normalization) with expanded data quality tests.
+- Deduplication applied exclusively at the intermediate layer on richer business keys, avoiding redundant logic across layers.
+- A single parameterized `dropoff_pickup_type(rideable_type, station_id, type)` macro replacing two near-identical macros, accepting `'pickup'` or `'dropoff'` as a `type` argument to generate the appropriate classification label.
 - Fact/dimension joins in marts.
-- Incremental fact loading in marts (`fct_trips`) to avoid full rebuilds every run.
+- Incremental fact loading in `fct_trips` to avoid full rebuilds every run.
 - BigQuery performance optimization using partitioning and clustering in `fct_trips`.
-- Data quality tests across intermediate and marts layers.
+- Data quality tests across staging, intermediate, and marts layers.
+- Full macro and report model documentation via `macros/schema.yml` and marts `schema.yml`.
 
 Test categories used:
 
@@ -165,6 +179,9 @@ Bikeshare Analytics Pipeline/
 │       │           ├── operational_map_tile.sql
 │       │           └── membership_behaviour_tile.sql
 │       ├── macros/
+│       │   ├── dropoff_pickup_type.sql
+│       │   ├── trip_distance.sql
+│       │   └── schema.yml
 │       └── packages.yml
 ├── terraform/
 │   ├── main.tf

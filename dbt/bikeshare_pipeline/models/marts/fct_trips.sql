@@ -32,8 +32,8 @@ with
                     "l1.latitude", "l1.longitude", "l2.latitude", "l2.longitude"
                 )
             }},
-            {{ pickup_type("a.rideable_type", "a.start_station_id") }},
-            {{ dropoff_type("a.rideable_type", "a.end_station_id") }},
+            a.pickup_type,
+            a.dropoff_type,
             a.member_casual
         from alltrips as a
         left join {{ ref("dim_stations") }} as s1 on a.start_station_id = s1.station_id

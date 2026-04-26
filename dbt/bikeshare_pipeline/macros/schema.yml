@@ -1,0 +1,31 @@
+version: 2
+
+macros:
+  - name: dropoffpickup_type
+    description: "Classifies a trip endpoint as station-based, dockless, or unknown based on rideable type and station ID nullability. Accepts a type parameter ('pickup' or 'dropoff') to generate the appropriate label."
+    arguments:
+      - name: rideable_type
+        type: string
+        description: "Column reference for the bike type."
+      - name: station_id
+        type: string
+        description: "Column reference for the station ID (start or end)."
+      - name: type
+        type: string
+        description: "Either 'pickup' or 'dropoff' — determines which label set to use."
+
+  - name: trip_distance
+    description: "Calculates the great-circle distance in meters between trip start and end coordinates using BigQuery's ST_DISTANCE function. Returns NULL if any coordinate is missing."
+    arguments:
+      - name: start_station_latitude
+        type: float
+        description: "Latitude of the trip start point."
+      - name: start_station_longitude
+        type: float
+        description: "Longitude of the trip start point."
+      - name: end_station_latitude
+        type: float
+        description: "Latitude of the trip end point."
+      - name: end_station_longitude
+        type: float
+        description: "Longitude of the trip end point."
