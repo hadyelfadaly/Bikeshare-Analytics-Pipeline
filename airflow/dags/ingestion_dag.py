@@ -95,9 +95,10 @@ with DAG(
         task_id="gcs_to_bigquery",
         bucket=BUCKET_NAME,
         source_objects=[f"raw/{parquet_file}"],
-        destination_project_dataset_table=f"{PROJECT_ID}.{DATASET_NAME}.trips",
+        destination_project_dataset_table=f"{PROJECT_ID}.{DATASET_NAME}.trips${{{{ logical_date.strftime('%Y%m') }}}}",
         source_format='PARQUET',
-        write_disposition='WRITE_APPEND'
+        write_disposition='WRITE_TRUNCATE',
+        time_partitioning={"type": "MONTH"}
     )
     cleanup_task = BashOperator(
         task_id="cleanup",

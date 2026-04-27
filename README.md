@@ -77,6 +77,9 @@ The Airflow DAG (`airflow/dags/ingestion_dag.py`) orchestrates the full monthly 
 
 This is an end-to-end orchestrated batch pipeline (not partially manual).
 
+**Idempotency:**
+The pipeline is fully idempotent at every layer. The `gcs_to_bigquery` task uses BigQuery's partition decorator (`trips$YYYYMM`) combined with `WRITE_TRUNCATE` to overwrite only the targeted month's partition on each run, leaving all other months intact. This means task retries and historical backfills are safe — re-running any month produces the exact same result without duplicating raw data. The dbt layer reinforces this further via incremental merge strategies on surrogate keys across all mart models.
+
 ## Data Warehouse Design
 
 Warehouse layers are implemented in dbt:
@@ -306,11 +309,14 @@ In Airflow UI:
 
 ### 9. Re-run behavior (idempotency checks)
 
-To verify reproducibility, run the DAG again for another logical date and confirm:
+The pipeline is fully idempotent. To verify:
 
-- Raw files are appended to lake/warehouse as expected.
-- dbt models rebuild successfully.
-- Tests pass consistently (`dbt test`).
+1. Note current row counts in `raw_bikeshare_data.trips` and `bikeshare_data_prod.fct_trips`.
+2. Clear and re-run any DAG run for a previously loaded month.
+3. Confirm row counts are identical after the re-run.
+4. Confirm dbt tests still pass with `dbt test --target prod`.
+
+Re-running any month overwrites only that month's raw partition via the `$YYYYMM` partition decorator and merges into mart tables without creating duplicates.
 
 ### 10. Airflow and Power BI notes
 
